@@ -46,16 +46,16 @@ public class GraphView extends QGraphicsView {
 
 	static {
 		NODE_SHAPE = new QPainterPath();
-		NODE_SHAPE.addEllipse(-10, -10, 20, 20);
+		NODE_SHAPE.addEllipse(-20, -20, 40, 40);
 
-		GRADIENT_SUNKEN = new QRadialGradient(-3, -3, 10);
+		GRADIENT_SUNKEN = new QRadialGradient(-3, -3, 20);
 		GRADIENT_SUNKEN.setCenter(3, 3);
 		GRADIENT_SUNKEN.setFocalPoint(3, 3);
 		GRADIENT_SUNKEN.setColorAt(1, new QColor(QColor.yellow).lighter(120));
 		GRADIENT_SUNKEN.setColorAt(0,
 				new QColor(QColor.darkYellow).lighter(120));
 
-		GRADIENT_NORMAL = new QRadialGradient(-3, -3, 10);
+		GRADIENT_NORMAL = new QRadialGradient(-3, -3, 20);
 		GRADIENT_NORMAL.setColorAt(0, QColor.yellow);
 		GRADIENT_NORMAL.setColorAt(1, QColor.darkYellow);
 	}
@@ -63,7 +63,7 @@ public class GraphView extends QGraphicsView {
 	public GraphView() {
 		QGraphicsScene scene = new QGraphicsScene(this);
 		scene.setItemIndexMethod(QGraphicsScene.ItemIndexMethod.NoIndex);
-		scene.setSceneRect(-200, -200, 400, 400);
+		scene.setSceneRect(-300, -200, 600, 400);
 		setScene(scene);
 
 		setCacheMode(new QGraphicsView.CacheMode(
@@ -81,7 +81,7 @@ public class GraphView extends QGraphicsView {
 		node1.setPos(-50, -50);
 		node2.setPos(0, -50);
 		scene.addItem(new Edge(node1, node2));
-		scale(2, 2);
+		//scale(2, 2);
 
 		setMinimumSize(400, 400);
 		setWindowTitle(tr("Elastic Nodes"));
@@ -205,7 +205,17 @@ public class GraphView extends QGraphicsView {
 		Edge e = new Edge(node);
 		scene().addItem(e);
 		node.addEdge(e);
+		node.update(node.boundingRect());
 		addingEdgeMode = true;
 		addedEdge = e;
+	}
+
+	public void snapToGrid() {
+		for (Node n : this.nodes) {
+			n.setX((Math.round(n.pos().x()/25) * 25));
+			n.setY((Math.round(n.pos().y()/25) * 25));
+			n.adjustEdges();
+		}
+		
 	}
 }

@@ -23,8 +23,8 @@ public class Node extends QGraphicsItem {
 	private List<Edge> edges = new ArrayList<Edge>();
 	private GraphView graph;
 	private double adjust = 2;
-	private QRectF boundingRect = new QRectF(-10 - adjust, -10 - adjust,
-			23 + adjust, 23 + adjust);
+	private QRectF boundingRect = new QRectF(-20 - adjust, -20 - adjust,
+			43 + adjust, 43 + adjust);
 	private String name;
 
 	public Node(GraphView graphWidget) {
@@ -62,7 +62,7 @@ public class Node extends QGraphicsItem {
 		}
 
 		painter.setPen(GraphView.QPEN_BLACK);
-		painter.drawEllipse(-10, -10, 20, 20);
+		painter.drawEllipse(-20, -20, 40, 40);
 		QPointF textOffset = new QPointF((double) 5, (double) -3);
 		painter.drawText(this.boundingRect.center().subtract(textOffset), name);
 	}
@@ -89,14 +89,18 @@ public class Node extends QGraphicsItem {
 
 	@Override
 	public void mousePressEvent(QGraphicsSceneMouseEvent event) {
-		update();
+		updateNode();
 		super.mousePressEvent(event);
 	}
 
 	@Override
 	public void mouseReleaseEvent(QGraphicsSceneMouseEvent event) {
-		update();
+		updateNode();
 		super.mouseReleaseEvent(event);
+	}
+	
+	public void updateNode() {
+		update();
 	}
 
 	public void setName(String name) {

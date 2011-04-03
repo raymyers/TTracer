@@ -66,14 +66,14 @@ public class Edge extends QGraphicsItem {
     void adjust() {
         QPointF destPos = destPos();
 		QPointF sourcePos = source.pos();
-		double dx = sourcePos.x()-destPos.x();
-        double dy = sourcePos.y()-destPos.y();
+		double dx = sourcePos.x() - destPos.x();
+        double dy = sourcePos.y() - destPos.y();
 
         double length = Math.sqrt(dx*dx+dy*dy);
         if (length == 0.0) return;
 
-        double paddingX = dx/length*10;
-        double paddingY = dy/length*10;
+        double paddingX = dx/length*20;
+        double paddingY = dy/length*20;
 
         prepareGeometryChange();
         sourcePoint.setX(sourcePos.x() - paddingX);

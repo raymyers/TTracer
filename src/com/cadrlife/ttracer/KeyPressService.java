@@ -38,6 +38,9 @@ public class KeyPressService {
 			graphView.addNode(node1);
 			//node1.setPos(graphView.getMousePosition());
 			break;
+		case Key_Tab:
+			graphView.snapToGrid();
+			break;
 		default:
 			graphView.rootkeyPressEvent(event);
 		}

@@ -1,4 +1,4 @@
-package com.trolltech.examples;
+package com.cadrlife.ttracer;
 
 import com.trolltech.qt.core.QPointF;
 import com.trolltech.qt.core.QRectF;
@@ -39,7 +39,13 @@ public class Edge extends QGraphicsItem {
         adjust();
     }
 
-    Node getSource() {
+    public Edge(Node sourceNode) {
+    	 source = sourceNode;
+         source.addEdge(this);
+         adjust();
+	}
+
+	Node getSource() {
     	
         return source;
     }
@@ -48,9 +54,20 @@ public class Edge extends QGraphicsItem {
         return dest;
     }
 
+    @Override
+    public String toString() {
+    	return "Edge " + source.getName() + " -> " + (getDestName());
+    }
+
+	private String getDestName() {
+		return dest == null ? " NULL " : dest.getName();
+	}
+    
     void adjust() {
-        double dx = source.pos().x()-dest.pos().x();
-        double dy = source.pos().y()-dest.pos().y();
+        QPointF destPos = destPos();
+		QPointF sourcePos = source.pos();
+		double dx = sourcePos.x()-destPos.x();
+        double dy = sourcePos.y()-destPos.y();
 
         double length = Math.sqrt(dx*dx+dy*dy);
         if (length == 0.0) return;
@@ -59,19 +76,23 @@ public class Edge extends QGraphicsItem {
         double paddingY = dy/length*10;
 
         prepareGeometryChange();
-        sourcePoint.setX(source.pos().x() - paddingX);
-        sourcePoint.setY(source.pos().y() - paddingY);
+        sourcePoint.setX(sourcePos.x() - paddingX);
+        sourcePoint.setY(sourcePos.y() - paddingY);
 
-        destPoint.setX(dest.pos().x() + paddingX);
-        destPoint.setY(dest.pos().y() + paddingY);
+        destPoint.setX(destPos.x() + paddingX);
+        destPoint.setY(destPos.y() + paddingY);
 
-        boundingRect.setBottomLeft(source.pos());
-        boundingRect.setTopRight(dest.pos());
+        boundingRect.setBottomLeft(sourcePos);
+        boundingRect.setTopRight(destPos);
 
         boundingRect = boundingRect.normalized();
 
         boundingRect.adjust(-extra, -extra, extra, extra);
     }
+
+	private QPointF destPos() {
+		return dest==null ? this.getSource().getGraph().getMousePosition() : dest.pos();
+	}
 
     @Override
     public QRectF boundingRect() {
@@ -81,7 +102,7 @@ public class Edge extends QGraphicsItem {
     @Override
     public void paint(QPainter painter, QStyleOptionGraphicsItem option, QWidget widget) {
 
-        if (source == null || dest == null)
+        if (source == null)
             return;
 
         // Draw the line itself
@@ -92,10 +113,12 @@ public class Edge extends QGraphicsItem {
 
         // Draw the arrows if there's enough room
         double angle;
-        if (line.length() > 0)
+        if (line.length() > 0) {
             angle = Math.acos(line.dx() / line.length());
-        else
+        }
+        else {
             angle = 0;
+        }
 
         if (line.dy() >= 0)
             angle = (Math.PI * 2) - angle;
@@ -127,4 +150,8 @@ public class Edge extends QGraphicsItem {
         painter.drawPolygon(pol1);
         painter.drawPolygon(pol2);
     }
+
+	public void setDest(Node node) {
+		this.dest = node;
+	}
 }

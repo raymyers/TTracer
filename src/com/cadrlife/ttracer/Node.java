@@ -1,4 +1,4 @@
-package com.trolltech.examples;
+package com.cadrlife.ttracer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ import com.trolltech.qt.gui.QWidget;
 
 public class Node extends QGraphicsItem {
 
-	private List<Edge> edgeList = new ArrayList<Edge>();
+	private List<Edge> edges = new ArrayList<Edge>();
 	private GraphView graph;
 	private double adjust = 2;
 	private QRectF boundingRect = new QRectF(-10 - adjust, -10 - adjust,
@@ -28,13 +28,13 @@ public class Node extends QGraphicsItem {
 	private String name;
 
 	public Node(GraphView graphWidget) {
-		graph = graphWidget;
+		setGraph(graphWidget);
 		setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable);
 		setZValue(1);
 	}
 
 	void addEdge(Edge edge) {
-		edgeList.add(edge);
+		edges.add(edge);
 		edge.adjust();
 	}
 
@@ -54,7 +54,6 @@ public class Node extends QGraphicsItem {
 			QWidget widget) {
 		painter.setPen(Qt.PenStyle.NoPen);
 		painter.setBrush(QColor.fromRgba(QColor.black.rgb() & 0x7fffffff));
-		painter.drawEllipse(-7, -7, 20, 20);
 
 		if ((option.state().isSet(QStyle.StateFlag.State_Sunken))) {
 			painter.setBrush(GraphView.GRADIENT_SUNKEN);
@@ -73,7 +72,7 @@ public class Node extends QGraphicsItem {
 		switch (change) {
 		case ItemPositionChange:
 			adjustEdges();
-			graph.itemMoved();
+			getGraph().itemMoved();
 			break;
 		default:
 			break;
@@ -83,7 +82,7 @@ public class Node extends QGraphicsItem {
 	}
 
 	public void adjustEdges() {
-		for (Edge edge : edgeList) {
+		for (Edge edge : edges) {
 			edge.adjust();
 		}
 	}
@@ -109,8 +108,23 @@ public class Node extends QGraphicsItem {
 	}
 
 	public void rightClick(QMouseEvent event) {
-		QMenu qMenu = new NodeMenu("Menu", this.graph);
+		QMenu qMenu = new NodeMenu(this,this.getGraph());
 		qMenu.exec(QCursor.pos());
-		qMenu.show();
+	}
+
+	public void removeAllEdges() {
+		for (Edge e : new ArrayList<Edge>(this.edges)) {
+			e.getSource().edges.remove(e);
+			e.getDest().edges.remove(e);
+			this.getGraph().scene().removeItem(e);
+		}
+	}
+
+	public void setGraph(GraphView graph) {
+		this.graph = graph;
+	}
+
+	public GraphView getGraph() {
+		return graph;
 	}
 }

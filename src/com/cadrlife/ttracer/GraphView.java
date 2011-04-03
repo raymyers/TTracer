@@ -1,4 +1,4 @@
-package com.trolltech.examples;
+package com.cadrlife.ttracer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import com.trolltech.qt.core.Qt;
 import com.trolltech.qt.core.Qt.MouseButton;
 import com.trolltech.qt.gui.QBrush;
 import com.trolltech.qt.gui.QColor;
-import com.trolltech.qt.gui.QFont;
 import com.trolltech.qt.gui.QGraphicsItemInterface;
 import com.trolltech.qt.gui.QGraphicsScene;
 import com.trolltech.qt.gui.QGraphicsView;
@@ -42,7 +41,9 @@ public class GraphView extends QGraphicsView {
 	static QPainterPath NODE_SHAPE;
 	private NodeNameService nodeNameService = new NodeNameService();
 	private QPointF mousePosition = new QPointF();
-	
+	private boolean addingEdgeMode;
+	private Edge addedEdge;
+
 	static {
 		NODE_SHAPE = new QPainterPath();
 		NODE_SHAPE.addEllipse(-10, -10, 20, 20);
@@ -76,7 +77,7 @@ public class GraphView extends QGraphicsView {
 		addNode(node1);
 		Node node2 = new Node(this);
 		addNode(node2);
-		
+
 		node1.setPos(-50, -50);
 		node2.setPos(0, -50);
 		scene.addItem(new Edge(node1, node2));
@@ -87,23 +88,21 @@ public class GraphView extends QGraphicsView {
 		setWindowIcon(new QIcon("classpath:com/trolltech/images/qt-logo.png"));
 	}
 
-
 	void addNode(Node node1) {
 		scene().addItem(node1);
 		nodes.add(node1);
 		node1.setName(nodeNameService.nextAvailableName(nodes));
-		node1.setPos(getMousePosition().x(),getMousePosition().y());
+		node1.setPos(getMousePosition().x(), getMousePosition().y());
 	}
-
 
 	@Override
 	protected void keyPressEvent(QKeyEvent event) {
 		new KeyPressService(this).processKeyEvent(event);
 	}
-	
+
 	@Override
 	protected void mouseMoveEvent(QMouseEvent event) {
-		
+
 		QPointF mapToScene = this.mapToScene(event.pos());
 		this.setMousePosition(mapToScene);
 		if (this.mousePressed) {
@@ -113,23 +112,34 @@ public class GraphView extends QGraphicsView {
 		}
 		super.mouseMoveEvent(event);
 	}
-	
+
 	@Override
 	protected void mousePressEvent(QMouseEvent event) {
 		this.mousePressed = true;
 		QGraphicsItemInterface clickedItem = this.itemAt(event.pos());
-		if (clickedItem instanceof Node && event.button() == MouseButton.RightButton) {
-			((Node) clickedItem).rightClick(event);
+		if (clickedItem != null && clickedItem instanceof Node) {
+			Node node = (Node) clickedItem;
+			if (event.button() == MouseButton.RightButton) {
+				node.rightClick(event);
+			} else if (addingEdgeMode && addedEdge.getSource() != node) {
+				addingEdgeMode = false;
+				addedEdge.setDest(node);
+				node.addEdge(addedEdge);
+				addedEdge.adjust();
+			}
 		}
 		super.mousePressEvent(event);
 	}
 
 	@Override
 	protected void mouseReleaseEvent(QMouseEvent event) {
-		this.mousePressed = false;	
+		this.mousePressed = false;
 		super.mouseReleaseEvent(event);
+		for (Node n : nodes) {
+			n.adjustEdges();
+		}
 	}
-	
+
 	@Override
 	protected void wheelEvent(QWheelEvent event) {
 		scaleView(Math.pow(2, -event.delta() / 240.0));
@@ -156,20 +166,6 @@ public class GraphView extends QGraphicsView {
 		painter.fillRect(rect.intersected(sceneRect), new QBrush(gradient));
 		painter.setBrush(QBrush.NoBrush);
 		painter.drawRect(sceneRect);
-
-		// Text
-		QRectF textRect = new QRectF(sceneRect.left() + 4, sceneRect.top() + 4,
-				sceneRect.width() - 4, sceneRect.height() - 4);
-		String message = tr("Click and drag the nodes around, and zoom with the mouse wheel or the '+' and '-' keys");
-
-		QFont font = painter.font();
-		font.setBold(true);
-		font.setPointSize(14);
-		painter.setFont(font);
-		painter.setPen(QColor.lightGray);
-		painter.drawText(textRect.translated(2, 2), message);
-		painter.setPen(QColor.black);
-		painter.drawText(textRect, message);
 	}
 
 	void scaleView(double scaleFactor) {
@@ -186,18 +182,30 @@ public class GraphView extends QGraphicsView {
 		super.keyPressEvent(event);
 	}
 
-
 	public void itemMoved() {
-		
-	}
 
+	}
 
 	public void setMousePosition(QPointF qPoint) {
 		this.mousePosition = qPoint;
 	}
 
-
 	public QPointF getMousePosition() {
 		return mousePosition;
+	}
+
+	public void removeNode(Node node) {
+		this.nodes.remove(node);
+		node.removeAllEdges();
+
+		this.scene().removeItem(node);
+	}
+
+	public void addEdgeWithSource(Node node) {
+		Edge e = new Edge(node);
+		scene().addItem(e);
+		node.addEdge(e);
+		addingEdgeMode = true;
+		addedEdge = e;
 	}
 }

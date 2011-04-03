@@ -1,4 +1,4 @@
-package com.trolltech.examples;
+package com.cadrlife.ttracer;
 
 import com.trolltech.qt.core.Qt;
 import com.trolltech.qt.gui.QKeyEvent;
@@ -35,8 +35,6 @@ public class KeyPressService {
 		case Key_Space:
 		case Key_Enter:
 			Node node1 = new Node(graphView);
-			System.err.println("node");
-			
 			graphView.addNode(node1);
 			//node1.setPos(graphView.getMousePosition());
 			break;

@@ -1,4 +1,4 @@
-package com.trolltech.examples;
+package com.cadrlife.ttracer;
 
 import com.trolltech.qt.gui.QApplication;
 

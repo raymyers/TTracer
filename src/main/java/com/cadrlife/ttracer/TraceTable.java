@@ -11,18 +11,43 @@ import com.trolltech.qt.gui.QWidget;
 
 public class TraceTable extends QTableWidget implements Tracable{
 	private final GraphView graphView;
+	private Tracer tracer;
 
 	public TraceTable(QWidget parent, GraphView graphView) {
 		super(parent);
 		this.graphView = graphView;
+		this.tracer = new Tracer(graphView);
 		setColumnCount(3);
-		setRowCount(20);
 		setHorizontalHeaderLabels(Arrays.asList("Frontier","Explored","Eval"));
-		new Tracer(graphView).trace(this);
 	}
 
 	@Override
 	public void putCell(int row, int col, String text) {
+		setRowCount(Math.max(row+1,rowCount()));
 		setItem(row, col, new QTableWidgetItem(text));
+	}
+
+	@Override
+	public void reportSolution(String path, int cost) {
+		int solutionRow = rowCount();
+		putCell(solutionRow, 0, "goal found");
+		putCell(solutionRow, 1, "solution = " + path);
+		putCell(solutionRow, 2, "cost = " + cost);
+	}
+	
+	public void execute() {
+		this.reset();
+		this.setRowCount(0);
+		tracer.trace(this);
+	}
+
+	public Tracer getTracer() {
+		return tracer;
+	}
+
+	@Override
+	public void reportError(String message) {
+		int solutionRow = rowCount();
+		putCell(solutionRow, 0, message);
 	}
 }

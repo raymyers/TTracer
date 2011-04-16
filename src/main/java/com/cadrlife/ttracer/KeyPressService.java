@@ -41,6 +41,7 @@ public class KeyPressService {
 			//node1.setPos(graphView.getMousePosition());
 			break;
 		case Key_Tab:
+		case Key_L:
 			graphView.snapToGrid();
 			break;
 		default:

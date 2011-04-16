@@ -1,10 +1,14 @@
 package com.cadrlife.ttracer.graph;
 
+import com.cadrlife.ttracer.menus.EdgeMenu;
 import com.trolltech.qt.core.QPointF;
 import com.trolltech.qt.core.QRectF;
 import com.trolltech.qt.gui.QColor;
+import com.trolltech.qt.gui.QCursor;
 import com.trolltech.qt.gui.QGraphicsItem;
 import com.trolltech.qt.gui.QLineF;
+import com.trolltech.qt.gui.QMenu;
+import com.trolltech.qt.gui.QMouseEvent;
 import com.trolltech.qt.gui.QPainter;
 import com.trolltech.qt.gui.QPolygonF;
 import com.trolltech.qt.gui.QStyleOptionGraphicsItem;
@@ -13,12 +17,14 @@ import com.trolltech.qt.gui.QWidget;
 public class Edge extends QGraphicsItem {
     private Node source;
     private Node dest;
+    private boolean forward = true;
+    private boolean backward = true;
 
     private QPointF sourcePoint = new QPointF();
     private QPointF destPoint = new QPointF();
     private double arrowSize = 10;
     private double penWidth = 1;
-    private double extra = (penWidth + arrowSize) / 2.0;
+    private double extra = (penWidth + arrowSize) / 2.0 + 5;
 
     private QRectF boundingRect = new QRectF();
 
@@ -30,6 +36,7 @@ public class Edge extends QGraphicsItem {
 
     QPolygonF pol1 = new QPolygonF();
     QPolygonF pol2 = new QPolygonF();
+	private int cost = 1;
 
     public Edge(Node sourceNode, Node destNode) {
         source = sourceNode;
@@ -46,7 +53,6 @@ public class Edge extends QGraphicsItem {
 	}
 
 	Node getSource() {
-    	
         return source;
     }
 
@@ -91,7 +97,7 @@ public class Edge extends QGraphicsItem {
     }
 
 	private QPointF destPos() {
-		return dest==null ? this.getSource().getGraph().getMousePosition() : dest.pos();
+		return dest == null ? this.getSource().getGraph().getMousePosition() : dest.pos();
 	}
 
     @Override
@@ -147,11 +153,65 @@ public class Edge extends QGraphicsItem {
         pol2.append(destArrowP2);
 
         painter.setBrush(QColor.black);
-        painter.drawPolygon(pol1);
-        painter.drawPolygon(pol2);
+        if (forward) {
+        	painter.drawPolygon(pol2);
+        }
+        if (backward) {
+        	painter.drawPolygon(pol1);
+        }
+        painter.drawText(line.pointAt(0.5), Integer.toString(getCost()));
     }
+    
+    public void rightClick(QMouseEvent event) {
+		QMenu qMenu = new EdgeMenu(this,getGraphView());
+		qMenu.exec(QCursor.pos());
+	}
+
+	private GraphView getGraphView() {
+		return (GraphView)this.scene().views().get(0);
+	}
 
 	public void setDest(Node node) {
 		this.dest = node;
+	}
+
+	public int getCost() {
+		return cost;
+	}
+
+	public void setCost(int cost) {
+		this.cost = cost;
+	}
+
+	public void setForward(boolean forward) {
+		this.forward = forward;
+	}
+
+	public boolean isForward() {
+		return forward;
+	}
+
+	public void setBackward(boolean backward) {
+		this.backward = backward;
+	}
+
+	public boolean isBackward() {
+		return backward;
+	}
+	
+	public void toggleDirection() {
+		if (forward && backward) {
+			backward = false;
+		} else if (forward) {
+			forward = false;
+			backward = true;
+		} else {
+			forward = true;
+		}
+		this.update();
+	}
+
+	public boolean isConnected(Node from, Node to) {
+		return (forward && source == from && dest == to) || (backward && source == to && dest == from);
 	}
 }

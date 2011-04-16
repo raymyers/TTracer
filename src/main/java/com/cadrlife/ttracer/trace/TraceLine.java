@@ -6,14 +6,14 @@ import java.util.List;
 import com.cadrlife.ttracer.State;
 
 public class TraceLine {
-	private List<State> frontier = new ArrayList<State>();
-	private List<State> explored = new ArrayList<State>();
+	private Frontier frontier = new Frontier();
+	private List<String> explored = new ArrayList<String>();
 	private State eval;
 	
-	public List<State> getFrontier() {
+	public Frontier getFrontier() {
 		return frontier;
 	}
-	public List<State> getExplored() {
+	public List<String> getExplored() {
 		return explored;
 	}
 	public State getEval() {
@@ -23,7 +23,7 @@ public class TraceLine {
 		this.eval = eval;
 	}
 	public State getFirstOfFrontier() {
-		return frontier.isEmpty() ? new State() :frontier.get(0);
+		return frontier.isEmpty() ? new State() :frontier.getFirst();
 	}
 	
 }

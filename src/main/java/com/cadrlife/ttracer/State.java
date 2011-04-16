@@ -1,5 +1,7 @@
 package com.cadrlife.ttracer;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+
 public class State {
 	private String nodeName = "";
 	private int cost = 0;
@@ -33,4 +35,10 @@ public class State {
 	public String toString() {
 		return nodeName + cost;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+
 }

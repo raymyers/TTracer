@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.cadrlife.ttracer.NodeMenu;
+import com.cadrlife.ttracer.menus.NodeMenu;
 import com.trolltech.qt.core.QPointF;
 import com.trolltech.qt.core.QRectF;
 import com.trolltech.qt.core.Qt;
@@ -17,18 +17,21 @@ import com.trolltech.qt.gui.QMenu;
 import com.trolltech.qt.gui.QMouseEvent;
 import com.trolltech.qt.gui.QPainter;
 import com.trolltech.qt.gui.QPainterPath;
+import com.trolltech.qt.gui.QPen;
 import com.trolltech.qt.gui.QStyle;
 import com.trolltech.qt.gui.QStyleOptionGraphicsItem;
 import com.trolltech.qt.gui.QWidget;
 
 public class Node extends QGraphicsItem {
-
+	static final QPen QPEN_BLACK = new QPen(QColor.black, 0);
+	static final QPen QPEN_BLACK_HEAVY = new QPen(QColor.black, 3);
 	private List<Edge> edges = new ArrayList<Edge>();
 	private GraphView graph;
 	private double adjust = 2;
 	private QRectF boundingRect = new QRectF(-20 - adjust, -20 - adjust,
 			43 + adjust, 43 + adjust);
-	private String name;
+	private String name = "";
+	private boolean goal = false;
 
 	public Node(GraphView graphWidget) {
 		setGraph(graphWidget);
@@ -64,7 +67,8 @@ public class Node extends QGraphicsItem {
 			painter.setBrush(GraphView.GRADIENT_NORMAL);
 		}
 
-		painter.setPen(GraphView.QPEN_BLACK);
+		painter.setPen(isGoal() ? QPEN_BLACK_HEAVY : QPEN_BLACK);
+		
 		painter.drawEllipse(-20, -20, 40, 40);
 		QPointF textOffset = new QPointF((double) 5, (double) -3);
 		painter.drawText(this.boundingRect.center().subtract(textOffset), name);
@@ -137,10 +141,10 @@ public class Node extends QGraphicsItem {
 
 	public Map<Edge,Node> getNeighborsByEdge() {
 		Map<Edge, Node> nodesByEdge = new LinkedHashMap<Edge, Node>();
-		for (Edge e : edges) {
-			Node otherNode = getOtherNodeInEdge(e);
-			if (otherNode != null) {
-				nodesByEdge.put(e, otherNode);
+		for (Edge edge : edges) {
+			Node otherNode = getOtherNodeInEdge(edge);
+			if (edge.isConnected(this,otherNode)) {
+				nodesByEdge.put(edge, otherNode);
 			}
 		}
 		return nodesByEdge;
@@ -149,5 +153,17 @@ public class Node extends QGraphicsItem {
 
 	private Node getOtherNodeInEdge(Edge e) {
 		return e.getSource() == this ? e.getDest() : e.getSource();
+	}
+
+	public boolean isGoal() {
+		return goal  ;
+	}
+
+	public void setGoal(boolean goal) {
+		this.goal = goal;
+	}
+
+	public void removeEdge(Edge edge) {
+		edges.remove(edge);
 	}
 }

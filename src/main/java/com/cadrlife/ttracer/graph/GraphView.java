@@ -5,12 +5,14 @@ import java.util.List;
 
 import com.cadrlife.ttracer.KeyPressService;
 import com.cadrlife.ttracer.NodeNameService;
+import com.cadrlife.ttracer.menus.GraphMenu;
 import com.trolltech.qt.core.QPointF;
 import com.trolltech.qt.core.QRectF;
 import com.trolltech.qt.core.Qt;
 import com.trolltech.qt.core.Qt.MouseButton;
 import com.trolltech.qt.gui.QBrush;
 import com.trolltech.qt.gui.QColor;
+import com.trolltech.qt.gui.QCursor;
 import com.trolltech.qt.gui.QGraphicsItemInterface;
 import com.trolltech.qt.gui.QGraphicsScene;
 import com.trolltech.qt.gui.QGraphicsView;
@@ -35,8 +37,6 @@ public class GraphView extends QGraphicsView {
 	static final QPen QPEN_EDGE = new QPen(QColor.black, 1,
 			Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap,
 			Qt.PenJoinStyle.RoundJoin);
-	static final QPen QPEN_BLACK = new QPen(QColor.black, 0);
-
 	static QRadialGradient GRADIENT_SUNKEN;
 	static QRadialGradient GRADIENT_NORMAL;
 
@@ -74,7 +74,14 @@ public class GraphView extends QGraphicsView {
 		setRenderHint(QPainter.RenderHint.Antialiasing);
 		setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse);
 		setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter);
+		//scale(2, 2);
+		createDefaultScene(scene);
+		setMinimumSize(400, 400);
+		setWindowTitle(tr("Elastic Nodes"));
+		setWindowIcon(new QIcon("classpath:com/trolltech/images/qt-logo.png"));
+	}
 
+	public void createDefaultScene(QGraphicsScene scene) {
 		Node node1 = new Node(this);
 		addNode(node1);
 		Node node2 = new Node(this);
@@ -82,18 +89,18 @@ public class GraphView extends QGraphicsView {
 
 		node1.setPos(-50, -50);
 		node2.setPos(0, -50);
-		scene.addItem(new Edge(node1, node2));
-		//scale(2, 2);
-
-		setMinimumSize(400, 400);
-		setWindowTitle(tr("Elastic Nodes"));
-		setWindowIcon(new QIcon("classpath:com/trolltech/images/qt-logo.png"));
+		Edge edge = new Edge(node1, node2);
+		scene.addItem(edge);
+		node1.addEdge(edge);
+		node2.addEdge(edge);
 	}
 
 	public void addNode(Node node1) {
 		scene().addItem(node1);
 		nodes.add(node1);
-		node1.setName(nodeNameService.nextAvailableName(nodes));
+		if (node1.getName().isEmpty()) {
+			node1.setName(nodeNameService.nextAvailableName(nodes));
+		}
 		node1.setPos(getMousePosition().x(), getMousePosition().y());
 	}
 
@@ -104,7 +111,6 @@ public class GraphView extends QGraphicsView {
 
 	@Override
 	protected void mouseMoveEvent(QMouseEvent event) {
-
 		QPointF mapToScene = this.mapToScene(event.pos());
 		this.setMousePosition(mapToScene);
 		if (this.mousePressed) {
@@ -118,10 +124,11 @@ public class GraphView extends QGraphicsView {
 	@Override
 	protected void mousePressEvent(QMouseEvent event) {
 		this.mousePressed = true;
+		boolean isRightClick = event.button() == MouseButton.RightButton;
 		QGraphicsItemInterface clickedItem = this.itemAt(event.pos());
 		if (clickedItem != null && clickedItem instanceof Node) {
 			Node node = (Node) clickedItem;
-			if (event.button() == MouseButton.RightButton) {
+			if (isRightClick) {
 				node.rightClick(event);
 			} else if (addingEdgeMode && addedEdge.getSource() != node) {
 				addingEdgeMode = false;
@@ -129,6 +136,15 @@ public class GraphView extends QGraphicsView {
 				node.addEdge(addedEdge);
 				addedEdge.adjust();
 			}
+		}
+		if (clickedItem != null && clickedItem instanceof Edge) {
+			Edge edge = (Edge) clickedItem;
+			if (isRightClick) {
+				edge.rightClick(event);
+			}
+		}
+		if (clickedItem == null && isRightClick) {
+			new GraphMenu(this).exec(QCursor.pos());
 		}
 		super.mousePressEvent(event);
 	}
@@ -202,6 +218,12 @@ public class GraphView extends QGraphicsView {
 
 		this.scene().removeItem(node);
 	}
+	
+	public void removeEdge(Edge edge) {
+		edge.getSource().removeEdge(edge);
+		edge.getDest().removeEdge(edge);
+		scene().removeItem(edge);
+	}
 
 	public void addEdgeWithSource(Node node) {
 		Edge e = new Edge(node);
@@ -218,7 +240,6 @@ public class GraphView extends QGraphicsView {
 			n.setY((Math.round(n.pos().y()/25) * 25));
 			n.adjustEdges();
 		}
-		
 	}
 
 	public Node findNodeByName(String name) {
@@ -229,4 +250,13 @@ public class GraphView extends QGraphicsView {
 		}
 		throw new IllegalArgumentException("Cannot find node named: " + name);
 	}
+
+	public Edge addEdge(Node source, Node dest) {
+		Edge edge = new Edge(source, dest);
+		scene().addItem(edge);
+		source.addEdge(edge);
+		dest.addEdge(edge);
+		return edge;
+	}
+
 }

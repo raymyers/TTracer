@@ -22,6 +22,7 @@ public final class MainWindow extends QMainWindow {
 		QMenuBar menuBar = menuBar();
 		menuBar.addMenu(fileMenu());
 		menuBar.addMenu(graphMenu());
+		graphView.createDefaultScene();
 	}
 
 	private void createLayout() {

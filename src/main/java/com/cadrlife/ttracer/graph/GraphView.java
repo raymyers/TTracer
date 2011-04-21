@@ -75,13 +75,12 @@ public class GraphView extends QGraphicsView {
 		setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse);
 		setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter);
 		//scale(2, 2);
-		createDefaultScene(scene);
 		setMinimumSize(400, 400);
 		setWindowTitle(tr("Elastic Nodes"));
 		setWindowIcon(new QIcon("classpath:com/trolltech/images/qt-logo.png"));
 	}
 
-	public void createDefaultScene(QGraphicsScene scene) {
+	public void createDefaultScene() {
 		Node node1 = new Node(this);
 		addNode(node1);
 		Node node2 = new Node(this);
@@ -90,7 +89,7 @@ public class GraphView extends QGraphicsView {
 		node1.setPos(-50, -50);
 		node2.setPos(0, -50);
 		Edge edge = new Edge(node1, node2);
-		scene.addItem(edge);
+		scene().addItem(edge);
 		node1.addEdge(edge);
 		node2.addEdge(edge);
 	}

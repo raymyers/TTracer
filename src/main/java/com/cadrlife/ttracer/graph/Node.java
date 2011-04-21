@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.cadrlife.ttracer.menus.NodeMenu;
+import com.google.common.collect.Maps;
 import com.trolltech.qt.core.QPointF;
 import com.trolltech.qt.core.QRectF;
 import com.trolltech.qt.core.Qt;
@@ -110,8 +112,9 @@ public class Node extends QGraphicsItem {
 		update();
 	}
 
-	public void setName(String name) {
+	public Node setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 	public String getName() {
@@ -140,7 +143,7 @@ public class Node extends QGraphicsItem {
 	}
 
 	public Map<Edge,Node> getNeighborsByEdge() {
-		Map<Edge, Node> nodesByEdge = new LinkedHashMap<Edge, Node>();
+		Map<Edge, Node> nodesByEdge = Maps.newTreeMap(new EdgeAngleComparator(this));
 		for (Edge edge : edges) {
 			Node otherNode = getOtherNodeInEdge(edge);
 			if (edge.isConnected(this,otherNode)) {

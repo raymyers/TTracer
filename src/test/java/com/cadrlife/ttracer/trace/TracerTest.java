@@ -60,8 +60,10 @@ public class TracerTest {
 	}
 
 	@Test
-	public void test() {
+	public void graphSearch() {
+		tracer.enableGraphSearch();
 		tracer.trace(tracable);
+		
 		verifyRow(0, "A0","","A0");
 		verifyRow(1, "D2 B2","A","D2");
 		verifyRow(2, "B2 G5 E5","A D","B2");

@@ -1,13 +1,13 @@
 package com.cadrlife.ttracer;
 
 import com.cadrlife.ttracer.graph.GraphView;
-import com.trolltech.qt.gui.QAction;
 import com.trolltech.qt.gui.QApplication;
 import com.trolltech.qt.gui.QComboBox;
 import com.trolltech.qt.gui.QGridLayout;
 import com.trolltech.qt.gui.QMainWindow;
 import com.trolltech.qt.gui.QMenu;
 import com.trolltech.qt.gui.QMenuBar;
+import com.trolltech.qt.gui.QTextEdit;
 import com.trolltech.qt.gui.QToolBar;
 import com.trolltech.qt.gui.QWidget;
 
@@ -31,7 +31,18 @@ public final class MainWindow extends QMainWindow {
 		QGridLayout grid = new QGridLayout(graphView);
 		centralWidget.setLayout(grid);
 		grid.addWidget(graphView, 0, 0);
-		grid.addWidget(traceTable, 0, 1);
+		grid.addWidget(tracerLayout(), 0, 1);
+	}
+	
+	private QWidget tracerLayout() {
+		QWidget centralWidget = new QWidget(this);
+		QGridLayout grid = new QGridLayout(this);
+		centralWidget.setLayout(grid);
+		grid.addWidget(traceTable, 0, 0);
+		QTextEdit qTextEdit = new QTextEdit();
+		traceTable.setResultBox(qTextEdit);
+		grid.addWidget(qTextEdit, 1, 0);
+		return centralWidget;
 	}
 	
 	private QToolBar toolBoar() {

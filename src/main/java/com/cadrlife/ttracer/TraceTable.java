@@ -7,15 +7,17 @@ import com.cadrlife.ttracer.trace.Tracable;
 import com.cadrlife.ttracer.trace.Tracer;
 import com.trolltech.qt.gui.QTableWidget;
 import com.trolltech.qt.gui.QTableWidgetItem;
+import com.trolltech.qt.gui.QTextEdit;
 import com.trolltech.qt.gui.QWidget;
 
 public class TraceTable extends QTableWidget implements Tracable{
-	private final GraphView graphView;
+//	private final GraphView graphView;
 	private Tracer tracer;
+	private QTextEdit resultTextEdit;
 
 	public TraceTable(QWidget parent, GraphView graphView) {
 		super(parent);
-		this.graphView = graphView;
+//		this.graphView = graphView;
 		this.tracer = new Tracer(graphView);
 		setColumnCount(3);
 		setHorizontalHeaderLabels(Arrays.asList("Frontier","Explored","Eval"));
@@ -29,10 +31,7 @@ public class TraceTable extends QTableWidget implements Tracable{
 
 	@Override
 	public void reportSolution(String path, int cost) {
-		int solutionRow = rowCount();
-		putCell(solutionRow, 0, "goal found");
-		putCell(solutionRow, 1, "solution = " + path);
-		putCell(solutionRow, 2, "cost = " + cost);
+		this.resultTextEdit.setText(String.format("Goal found;\nSolution = %s;\nCost = %d;", path, cost));
 	}
 	
 	public void execute() {
@@ -47,7 +46,11 @@ public class TraceTable extends QTableWidget implements Tracable{
 
 	@Override
 	public void reportError(String message) {
-		int solutionRow = rowCount();
-		putCell(solutionRow, 0, message);
+		this.resultTextEdit.setText(message);
+	}
+
+	public void setResultBox(QTextEdit qTextEdit) {
+		this.resultTextEdit = qTextEdit;
+		
 	}
 }

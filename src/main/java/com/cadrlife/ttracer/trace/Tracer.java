@@ -1,10 +1,8 @@
 package com.cadrlife.ttracer.trace;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import com.cadrlife.ttracer.State;
 import com.cadrlife.ttracer.graph.Edge;
@@ -13,7 +11,6 @@ import com.cadrlife.ttracer.graph.Node;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class Tracer {
 
